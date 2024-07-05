@@ -1,36 +1,53 @@
-"use client"
-import { createMessage } from "@/actions/form-actions";
-import styles from "./../app/page.module.css";
-import { useRef } from "react";
-
+import { useRef, FormEvent } from 'react';
+import { createMessage } from '@/actions/form-actions';
 
 const ContactForm = () => {
+  const formRef = useRef<HTMLFormElement>(null);
 
-    const formRef = useRef<HTMLFormElement>(null)
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!formRef.current) return;
+
+    const formData = new FormData(formRef.current);
+    const newMessage = await createMessage(formData);
+
+    if ('error' in newMessage) {
+      alert(`Error: ${newMessage.error}`);
+    } else {
+      alert('Mensaje enviado');
+      formRef.current.reset();
+    }
+  };
+
   return (
-    <div className="flex justify-center items-center h-screen">
-      <form ref ={formRef} action={async formData => {
-        const newMessage = await createMessage(formData)
-        
-        newMessage? alert('Mensaje enviado') : alert('Hay un error en los campos del formulario')
-        formRef.current?.reset()
-      }}>
-        <input type="text" placeholder="Nombre" 
-          className="border border-gray-300 rounded-md p-2 block mb-2"
+    <div >
+      <form ref={formRef} onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Nombre"
           name="userName"
         />
-        <input type="text" placeholder="Correo" 
-          className="border border-gray-300 rounded-md p-2 block"
+        <input
+          type="text"
+          placeholder="Correo"
           name="userEmail"
         />
 
-        <textarea name="userMessage" id="" placeholder="Dejame un mensaje"></textarea>
+        <textarea
+          name="userMessage"
+          placeholder="Dejame un mensaje"
+          rows={4}
+        ></textarea>
+
         <button
-          className="bg-blue-500 text-white p-2 rounded-md mt-2 block w-full"
-        >Enviar</button>
+          type="submit"
+        >
+          Enviar
+        </button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default ContactForm
+export default ContactForm;
